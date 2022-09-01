@@ -528,3 +528,34 @@ func TestLazyGet_CustomMapper(t *testing.T) {
 		t.Errorf("expected key1=value1,key2=value2, got %v", value)
 	}
 }
+
+func TestLazyGet_OrPanic(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+				t.Errorf("expected OrPanic to panic when no value is present")
+		}
+	}()
+	lazyenv.Get("TEST_OR_PANIC", lazyenv.OrPanic[string])
+
+	t.Errorf("if this test made it this far, it did not panic as it was supposed to")
+}
+
+func TestLazyMustGet_Panic(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+				t.Errorf("expected OrPanic to panic when no value is present")
+		}
+	}()
+	lazyenv.MustGet[string]("MUSTGET_TEST_PANIC")
+
+	t.Errorf("if this test made it this far, it did not panic as it was supposed to")
+}
+
+func TestLazyMustGet_Exists(t *testing.T) {
+	os.Setenv("MUSTGET_TEST_PANIC", "test")
+	v := lazyenv.MustGet[string]("MUSTGET_TEST_PANIC")
+
+	if v != "test" {
+		t.Errorf("expected value to be %s, got instead: %s", "test", v)
+	}
+}

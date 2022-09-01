@@ -91,6 +91,13 @@ func Get[T any](key string, getDefaultValue GetDefaultValue[T], optionalMapper .
 	return castAs[T](value)
 }
 
+// MustGet returns the value or panics if it's not available
+func MustGet[T any](key string, optionalMapper ...Mapper[T]) T {
+	// it's ok to ignore err, OrPanic stops Get from returning it
+	value, _ := Get(key, OrPanic[T], optionalMapper...)
+	return value
+}
+
 // Required is a default value getter that returns the value of the environment variable if it is set, otherwise it returns an error
 func Required[T any](params GetDefaultValueParams) (T, error) {
 	var v T
@@ -108,6 +115,10 @@ func OrReturn[T any](defaultValue T) func (key GetDefaultValueParams) (T, error)
 	return func (key GetDefaultValueParams) (T, error) {
 		return defaultValue, nil
 	}
+}
+
+func OrPanic[T any](params GetDefaultValueParams) (T, error) {
+	panic(errors.New("required variable not found: " + params.Key))
 }
 
 // String is a mapper that returns the value of the variable as a string
